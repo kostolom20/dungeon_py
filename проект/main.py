@@ -1,4 +1,5 @@
 import pygame
+import sqlite3
 
 from Player import Player
 from Enemy1 import Enemy1
@@ -17,6 +18,20 @@ RED = (255, 0, 0)
 WIDTH = 800
 HEIGHT = 600
 
+# База данных
+# ===================================================
+conn = sqlite3.connect('rooms.db') #
+cur = conn.cursor()
+cur.execute("""CREATE TABLE IF NOT EXISTS rooms(
+   room INT PRIMARY KEY,
+   X INT,
+   Y INT,
+   WIDTH INT,
+   HEIGHT INT);
+""")
+conn.commit()
+
+# =============================================
 
 def animate(group):
     global done
@@ -154,12 +169,15 @@ screen.blit(enemy2.image, enemy2.rect)
 enemy_group.add(player)
 
 rooms = []
-room = Room1()
+room = Room1(cur, conn) #  cur - запросы к БД; conn - соединение с БД;
 rooms.append(room)
-room = Room2()
+
+room = Room2(cur, conn)
 rooms.append(room)
-room = Room3()
+
+room = Room3(cur, conn)
 rooms.append(room)
+
 current_room_no = 0
 current_room = rooms[current_room_no]
 

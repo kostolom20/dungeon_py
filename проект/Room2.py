@@ -4,7 +4,7 @@ from Wall import Wall
 
 class Room2(Room):
 
-    def __init__(self):
+    def __init__(self, cur, conn):
         super().__init__()
         walls = [[0, 0, 20, 600],
                  [780, 0, 20, 440],
@@ -51,3 +51,13 @@ class Room2(Room):
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3])
             self.wall_list.add(wall)
+            x = item[0]
+            y = item[1]
+            width = item[2]
+            height = item[3]
+            temp = (2, x, y, width, height)
+            cur.execute("INSERT or REPLACE into rooms VALUES (?,?,?,?,?);", temp)
+            conn.commit()
+            cur.execute("SELECT * FROM rooms;")
+            all_result = cur.fetchall()
+            print(all_result)
