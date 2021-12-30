@@ -48,6 +48,8 @@ class Room2(Room):
                  [700, 400, 20, 20]
                  ]
 
+        room = 2
+        iteration = 38
         for item in walls:
             wall = Wall(item[0], item[1], item[2], item[3])
             self.wall_list.add(wall)
@@ -55,9 +57,15 @@ class Room2(Room):
             y = item[1]
             width = item[2]
             height = item[3]
-            temp = (2, x, y, width, height)
-            cur.execute("INSERT or REPLACE into rooms VALUES (?,?,?,?,?);", temp)
-            conn.commit()
-            cur.execute("SELECT * FROM rooms;")
-            all_result = cur.fetchall()
-            print(all_result)
+            iteration += 1
+            temp = (room, iteration, x, y, width, height)
+            cur.execute(f"SELECT ITERATION FROM rooms WHERE ITERATION = '{iteration}'")
+            if cur.fetchone() is None:
+                cur.execute("INSERT or IGNORE INTO rooms VALUES (?,?,?,?,?,?)", temp)
+                conn.commit()
+                print('Добавил новую строчку')
+                print("Room:", temp[0], "Iteration:", temp[1], "X:", temp[2], "Y:", temp[3], "WIDTH:", temp[4],
+                      "HEIGHT:", temp[5])
+            else:
+                print('Такая запись уже есть')
+

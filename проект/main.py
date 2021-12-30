@@ -23,7 +23,8 @@ HEIGHT = 600
 conn = sqlite3.connect('rooms.db') #
 cur = conn.cursor()
 cur.execute("""CREATE TABLE IF NOT EXISTS rooms(
-   room INT PRIMARY KEY,
+   ROOM INT,
+   ITERATION INT,
    X INT,
    Y INT,
    WIDTH INT,
@@ -33,16 +34,14 @@ conn.commit()
 
 # =============================================
 
-def animate(group):
-    global done
-    global game_state
-    enemy_group.remove(player)
-    if pygame.sprite.spritecollide(player, enemy_group, False):
+def animate(group, game_state):
+    group.remove(player)
+    if pygame.sprite.spritecollide(player, group, False):
         game_state = 'died'
-    enemy_group.add(player)
+    group.add(player)
     screen.blit(enemy1.image, enemy1.rect)
     screen.blit(enemy2.image, enemy2.rect)
-
+    return game_state
 
 def menu():
     screen.blit(fon_menu, (0, 0))
@@ -190,15 +189,12 @@ continueButton = button((0, 100, 80), 50, 350, 300, 100, "continue")
 historyButton = button((0, 100, 80), 50, 400, 250, 100, "story")
 menuButton = button((0, 100, 80), 320, 500, 200, 80, "menu")
 
-game_state = "menu"
-done = False
+
 kol = 1
 died_num = 0
 
 
-def tick():
-    global timer_started
-    global start_time
+def tick(timer_started, start_time):
     timer_started = not timer_started
     if timer_started:
         start_time = pygame.time.get_ticks()
@@ -206,13 +202,15 @@ def tick():
         results.append(passed_time)
         if len(results) > 10:
             results.pop(0)
-
+    return timer_started, start_time
 
 passed_time = 0
 start_time = 0
 timer_started = False
-
 results = []
+
+game_state = "menu"
+done = False
 while not done:
 
     if game_state == "menu":
@@ -380,9 +378,9 @@ while not done:
         player.rect.x = 70
         player.rect.y = 500
     if player.rect.x == 50 and player.rect.y == 500:
-        tick()
+        timer_started, start_time = tick(timer_started, start_time)
     if player.rect.x == 780:
-        tick()
+        timer_started, start_time = tick(timer_started, start_time)
 
     if player.rect.x > 780:
         if current_room_no == 0:
@@ -424,7 +422,7 @@ while not done:
     screen.blit(background, (0, 0))
     font = pygame.font.Font('anim/gothic.ttf', 26)
 
-    animate(enemy_group)
+    game_state = animate(enemy_group, game_state)
     enemy1.move()
     enemy2.move()
 
